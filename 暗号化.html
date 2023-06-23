@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>優雅な紅茶のひと時を</title>
+</head>
+<body>
+  <h1>文字列の暗号化・復号化</h1>
+  <label for="input">暗号化または復号化したい文字列:</label>
+  <input type="text" id="input" />
+
+  <label for="key">合言葉:</label>
+  <input type="password" id="key" />
+
+  <button onclick="authenticate()">認証</button>
+  <button onclick="encrypt()" disabled id="encryptButton">暗号化</button>
+  <button onclick="decrypt()" disabled id="decryptButton">復号化</button>
+
+  <h2>暗号化・復号化された文字列:</h2>
+  <p id="result"></p>
+  <script>
+    async function sha256(text) {
+      const uint8 = new TextEncoder().encode(text);
+      const digest = await crypto.subtle.digest('SHA-256', uint8);
+      return Array.from(new Uint8Array(digest))
+        .map(v => v.toString(16).padStart(2, '0'))
+        .join('');
+    }
+
+    function authenticate() {
+      var password = prompt("パスワードを入力してください:", "");
+
+      sha256(password).then(hash => {
+        if (hash === "68cfc1bcb7bcf85f49669de1999929632a98924c15a0ecf35d2e8f1513d872f5") {
+          document.getElementById("encryptButton").disabled = false;
+          document.getElementById("decryptButton").disabled = false;
+        } else {
+          alert("パスワードが一致しません。操作は許可されていません。");
+        }
+      });
+    }
+
+    function encrypt() {
+      var input = document.getElementById("input").value;
+      var key = document.getElementById("key").value;
+
+      var encrypted = "";
+
+      for (var i = 0; i < input.length; i++) {
+        var charCode = input.charCodeAt(i);
+        var keyIndex = i % key.length;
+        var keyChar = key.charCodeAt(keyIndex);
+
+        var encryptedCharCode = charCode + keyChar;
+
+        encrypted += String.fromCharCode(encryptedCharCode);
+      }
+
+      document.getElementById("result").textContent = encrypted;
+    }
+
+    function decrypt() {
+      var input = document.getElementById("input").value;
+      var key = document.getElementById("key").value;
+
+      var decrypted = "";
+
+      for (var i = 0; i < input.length; i++) {
+        var charCode = input.charCodeAt(i);
+        var keyIndex = i % key.length;
+        var keyChar = key.charCodeAt(keyIndex);
+
+        var decryptedCharCode = charCode - keyChar;
+
+        decrypted += String.fromCharCode(decryptedCharCode);
+      }
+
+      document.getElementById("result").textContent = decrypted;
+    }
+  </script>
+</body>
+</html>
